@@ -1,7 +1,4 @@
 plugins:
-  accept_language_enabled:
-    default: true
-    client: true
-  accept_language_overrides_default_locale:
+  force_http_language_header:
     default: false
     client: true

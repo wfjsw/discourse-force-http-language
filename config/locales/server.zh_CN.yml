@@ -1,0 +1,4 @@
+zh_CN:
+  site_settings:
+    force_http_language_header: "强制按照浏览器语言设置网站语言"
+
