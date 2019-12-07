@@ -1,12 +1,10 @@
 # name: force_http_language_header
 # about: Force UI Language to be set by browser language header.
-# version: 0.1.1
+# version: 0.1.2
 # authors: wfjsw
 # url: https://github.com/wfjsw/discourse-force-http-language
 
 enabled_site_setting :force_http_language_header
-
-gem 'http_accept_language', '2.0.5'
 
 require 'current_user'
 
