@@ -21,12 +21,13 @@ after_initialize do
           else
             locale = SiteSetting.default_locale
           end
-        else if check_current_user
+        elsif check_current_user
           locale = current_user.effective_locale
         end
       end
 
-      I18n.locale = I18n.locale_available?(locale) ? locale : SiteSettings::DefaultsProvider::DEFAULT_LOCALE
+      locale = I18n.locale_available?(locale) ? locale : SiteSettings::DefaultsProvider::DEFAULT_LOCALE
+      
       I18n.ensure_all_loaded!
       I18n.with_locale(locale) { yield }
     end
