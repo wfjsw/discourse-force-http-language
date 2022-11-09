@@ -1,6 +1,6 @@
 # name: force_http_language_header
 # about: Force UI Language to be set by browser language header.
-# version: 1.0.0
+# version: 2.0.0
 # authors: wfjsw
 # url: https://github.com/wfjsw/discourse-force-http-language
 
@@ -12,22 +12,20 @@ after_initialize do
 
   ApplicationController.class_eval do
     def with_resolved_locale(check_current_user: true)
+      locale_from_header = HttpLanguageParser.parse(request.env["HTTP_ACCEPT_LANGUAGE"])
       if SiteSetting.force_http_language_header
         locale = locale_from_header
       else
-        if !current_user
-          if SiteSetting.set_locale_from_accept_language_header
-            locale = locale_from_header
-          else
-            locale = SiteSetting.default_locale
-          end
-        elsif check_current_user
-          locale = current_user.effective_locale
+        if check_current_user && (user = current_user rescue nil)
+          locale = user.effective_locale
+        else
+          locale = Discourse.anonymous_locale(request)
+          locale ||= SiteSetting.default_locale
         end
       end
-
-      locale = I18n.locale_available?(locale) ? locale : SiteSettings::DefaultsProvider::DEFAULT_LOCALE
-      
+      if !I18n.locale_available?(locale)
+        locale = SiteSettings::DefaultsProvider::DEFAULT_LOCALE
+      end
       I18n.ensure_all_loaded!
       I18n.with_locale(locale) { yield }
     end
