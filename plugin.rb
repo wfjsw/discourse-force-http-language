@@ -12,20 +12,27 @@ after_initialize do
 
   ApplicationController.class_eval do
     def with_resolved_locale(check_current_user: true)
-      locale_from_header = HttpLanguageParser.parse(request.env["HTTP_ACCEPT_LANGUAGE"])
       if SiteSetting.force_http_language_header
-        locale = locale_from_header
+        locale = HttpLanguageParser.parse(request.env["HTTP_ACCEPT_LANGUAGE"])
       else
-        if check_current_user && (user = current_user rescue nil)
+        if check_current_user &&
+            (
+              user =
+                begin
+                  current_user
+                rescue StandardError
+                  nil
+                end
+            )
           locale = user.effective_locale
         else
           locale = Discourse.anonymous_locale(request)
           locale ||= SiteSetting.default_locale
+          persist_locale_param_to_cookie
         end
       end
-      if !I18n.locale_available?(locale)
-        locale = SiteSettings::DefaultsProvider::DEFAULT_LOCALE
-      end
+      locale = SiteSettings::DefaultsProvider::DEFAULT_LOCALE if !I18n.locale_available?(locale)
+
       I18n.ensure_all_loaded!
       I18n.with_locale(locale) { yield }
     end
